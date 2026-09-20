@@ -53,10 +53,12 @@ function jevFetch(answer: (name: string) => number, bodies: string[] = []) {
 
 describe('hook config', () => {
   it('reads userConfig values and falls back to defaults', () => {
-    expect(resolveHookConfig({})).toEqual({ compactAtPercent: 60, minReductionRatio: 0.25, model: 'jev-latest' });
+    expect(resolveHookConfig({})).toEqual({ provider: 'typesafe', compactAtPercent: 60, minReductionRatio: 0.25, model: 'jev-latest' });
+    expect(resolveHookConfig({ provider: 'openrouter' })).toEqual({ provider: 'openrouter', compactAtPercent: 60, minReductionRatio: 0.25, model: 'typesafe/jev-1.13' });
     expect(
       resolveHookConfig({ apiKey: 'k', keepThreshold: 0.3, maxStateTokens: 1000, model: 'jev-x', goal: 'g', compactAtPercent: 'no' }),
     ).toEqual({
+      provider: 'typesafe',
       apiKey: 'k',
       keepThreshold: 0.3,
       maxStateTokens: 1000,

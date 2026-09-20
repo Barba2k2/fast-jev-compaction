@@ -10,6 +10,7 @@ import {
   estimateTokens,
   fitState,
   JevClient,
+  noulAnswer,
   parseJevResponse,
   reductionRatio,
   resolveOptions,
@@ -429,5 +430,26 @@ describe('HTTP client', () => {
     await expect(
       compactMessages(transcript(), { apiKey: '', preserveRecentMessages: 1 }),
     ).rejects.toThrow(/TYPESAFE_API_KEY/);
+  });
+});
+
+describe('openrouter provider', () => {
+  it('targets the decisions endpoint with the dated Jev id', () => {
+    const request = buildJevRequest({ apiKey: 'k', provider: 'openrouter' }, 'state', {
+      keep: { type: 'noul', instructions: 'Keep it?' },
+    });
+    expect(request.url).toBe('https://openrouter.ai/api/alpha/decisions');
+    expect(JSON.parse(request.body).model).toBe('typesafe/jev-1.13');
+  });
+
+  it('reads the probability the decisions format returns in place of noul', () => {
+    expect(noulAnswer({ keep: { probability: 0.7 } }, 'keep')).toBe(0.7);
+    expect(noulAnswer({ keep: { noul: 0.7 } }, 'keep')).toBe(0.7);
+    expect(() => noulAnswer({ keep: {} as never }, 'keep')).toThrow(/Invalid Jev answer/);
+  });
+
+  it('asks OpenRouter for the key it actually needs', async () => {
+    const client = new JevClient({ provider: 'openrouter', apiKey: '' });
+    await expect(client.ask('state', {})).rejects.toThrow('OPENROUTER_API_KEY is not configured');
   });
 });
