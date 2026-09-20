@@ -167,7 +167,9 @@ export type JevQuestions = Record<string, JevQuestion>;
 
 export interface NoulAnswer {
   type?: 'noul';
-  noul: number;
+  noul?: number;
+  /** The OpenRouter decisions endpoint returns the same probability under this name. */
+  probability?: number;
 }
 
 export interface ChoiceAnswer {
