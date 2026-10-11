@@ -235,7 +235,10 @@ async function getApiKey(
 ): Promise<string | undefined> {
   if (config.apiKey) return config.apiKey;
   const name = keyName(config.provider);
-  const fromEnv = await $.env.get(name);
+  const fromEnv =
+    config.provider === 'openrouter'
+      ? await $.env.get('OPENROUTER_API_KEY')
+      : await $.env.get('TYPESAFE_API_KEY');
   if (fromEnv) return fromEnv;
   const settings = await $.settings.read();
   const env = settings['env'];
