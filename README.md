@@ -93,16 +93,34 @@ method) and call `compact(messages, asker, options)`; `buildJevRequest` and
 The building blocks (`collectToolCalls`, `fitState`, `batchCalls`,
 `decideCall`, `applyDecisions`) are exported too.
 
-`apiKey` defaults to `process.env.TYPESAFE_API_KEY`. Never commit the key or
-put it in a source file.
+`apiKey` defaults to `process.env.TYPESAFE_API_KEY`, or to
+`process.env.OPENROUTER_API_KEY` when the provider is `openrouter`. Never
+commit the key or put it in a source file.
+
+## Reaching Jev through OpenRouter
+
+Jev is also served by OpenRouter, at its own decisions endpoint rather than as
+a chat model. Pass `provider: 'openrouter'` (or set only `OPENROUTER_API_KEY`
+and let it be detected) and the requests go to
+`https://openrouter.ai/api/alpha/decisions` with the same
+`{ model, state, questions }` body. The judgments still come from Jev.
+
+```ts
+const client = new JevClient({ provider: 'openrouter' });
+```
+
+Two details of that wire format are handled for you: the model id must be
+dated — `typesafe/jev-1.13`, since `typesafe/jev-latest` does not resolve —
+and a `noul` answer arrives as `probability`.
 
 ## Options
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `apiKey` | `TYPESAFE_API_KEY` | TypeSafe API key (`compactMessages`/`JevClient`) |
-| `model` | `jev-latest` | Jev model name |
-| `baseUrl` | `https://api.typesafe.ai/v1/systemone` | System One endpoint |
+| `provider` | `openrouter` when only `OPENROUTER_API_KEY` is set, else `typesafe` | Where to reach Jev |
+| `apiKey` | `TYPESAFE_API_KEY`, or `OPENROUTER_API_KEY` on OpenRouter | Jev API key (`compactMessages`/`JevClient`) |
+| `model` | `jev-latest`, or `typesafe/jev-1.13` on OpenRouter | Jev model name |
+| `baseUrl` | provider endpoint | `https://api.typesafe.ai/v1/systemone`, or `https://openrouter.ai/api/alpha/decisions` |
 | `fetch` | native `fetch` | Injectable fetch implementation for tests |
 | `goal` | last 3 user prompts | Ongoing task description included in the state |
 | `keepThreshold` | `0.5` | Minimum keep probability for a call or result to stay |

@@ -2,6 +2,24 @@ import type { JevAnswer, JevQuestions, JevResponse, JevState } from './types.js'
 
 export const SYSTEM_ONE_URL = 'https://api.typesafe.ai/v1/systemone';
 export const DEFAULT_MODEL = 'jev-latest';
+/** OpenRouter serves Jev itself here, with the System One request shape. */
+export const DECISIONS_URL = 'https://openrouter.ai/api/alpha/decisions';
+/** `typesafe/jev-latest` does not resolve on OpenRouter; a dated id does. */
+export const OPENROUTER_MODEL = 'typesafe/jev-1.13';
+
+export type JevProvider = 'typesafe' | 'openrouter';
+
+export function providerUrl(provider: JevProvider | undefined): string {
+  return provider === 'openrouter' ? DECISIONS_URL : SYSTEM_ONE_URL;
+}
+
+export function keyName(provider: JevProvider | undefined): string {
+  return provider === 'openrouter' ? 'OPENROUTER_API_KEY' : 'TYPESAFE_API_KEY';
+}
+
+export function providerModel(provider: JevProvider | undefined): string {
+  return provider === 'openrouter' ? OPENROUTER_MODEL : DEFAULT_MODEL;
+}
 
 export interface JevRequest {
   url: string;
@@ -16,19 +34,20 @@ export function buildJevRequest(
     apiKey: string;
     model?: string;
     baseUrl?: string;
+    provider?: JevProvider;
   },
   state: JevState,
   questions: JevQuestions,
 ): JevRequest {
   return {
-    url: params.baseUrl ?? SYSTEM_ONE_URL,
+    url: params.baseUrl ?? providerUrl(params.provider),
     method: 'POST',
     headers: {
       authorization: `Bearer ${params.apiKey}`,
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      model: params.model ?? DEFAULT_MODEL,
+      model: params.model ?? providerModel(params.provider),
       state,
       questions,
     }),
@@ -68,13 +87,12 @@ export function noulAnswer(
   name: string,
 ): number {
   const answer = answers[name];
-  if (
-    !answer ||
-    !('noul' in answer) ||
-    typeof answer.noul !== 'number' ||
-    !Number.isFinite(answer.noul)
-  ) {
+  // The OpenRouter decisions wire format names the same value `probability`.
+  const value = answer && 'noul' in answer ? answer.noul
+    : answer && 'probability' in answer ? answer.probability
+    : undefined;
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
     throw new Error(`Invalid Jev answer for ${name}`);
   }
-  return answer.noul;
+  return value;
 }

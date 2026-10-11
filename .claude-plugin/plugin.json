@@ -4,10 +4,16 @@
   "description": "Verbatim Jev-guided compaction for Claude Code sessions.",
   "license": "MIT",
   "userConfig": {
+    "provider": {
+      "type": "string",
+      "title": "Jev provider",
+      "description": "Where to reach Jev: typesafe (api.typesafe.ai) or openrouter (openrouter.ai decisions endpoint).",
+      "default": "typesafe"
+    },
     "apiKey": {
       "type": "string",
-      "title": "TypeSafe API key",
-      "description": "TypeSafe API key. Leave unset to use TYPESAFE_API_KEY.",
+      "title": "Jev API key",
+      "description": "Leave unset to use TYPESAFE_API_KEY, or OPENROUTER_API_KEY when the provider is openrouter.",
       "sensitive": true
     },
     "keepThreshold": {
@@ -55,7 +61,7 @@
     "model": {
       "type": "string",
       "title": "Jev model",
-      "description": "TypeSafe Jev model name.",
+      "description": "Jev model name. Defaults to jev-latest, or typesafe/jev-1.13 on OpenRouter.",
       "default": "jev-latest"
     }
   }

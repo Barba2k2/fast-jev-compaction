@@ -55,14 +55,15 @@ The plugin declares these `userConfig` values in
 | `maxStateTokens` | `25000` |
 | `maxRequestTokens` | `30000` |
 | `truncateHeadChars` | `300` |
-| `model` | `jev-latest` |
+| `provider` | `typesafe` |
+| `model` | `jev-latest` (`typesafe/jev-1.13` when `provider` is `openrouter`) |
 
-The TypeSafe key can be supplied as the sensitive `apiKey` plugin option or
-through `TYPESAFE_API_KEY`. The environment variable is the recommended
-development setup.
+The key can be supplied as the sensitive `apiKey` plugin option or through the
+environment: `TYPESAFE_API_KEY`, or `OPENROUTER_API_KEY` when `provider` is
+`openrouter`. The environment variable is the recommended development setup.
 
-Every option except `apiKey`, `compactAtPercent`, `minReductionRatio` and
-`model` is passed straight to the library; see the root README for what they
+Every option except `provider`, `apiKey`, `compactAtPercent`,
+`minReductionRatio` and `model` is passed straight to the library; see the root README for what they
 do. The `session.compact` hook runs the Jev requests concurrently. If Jev fails,
 the response is malformed, the key is unavailable, the history cannot be
 fitted into the state budget, or the estimated reduction is below
